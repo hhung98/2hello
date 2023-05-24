@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>2 HELLO</title>
+    <link rel="icon" href="http://mail.seoultech.ac.kr/mail/img/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- FontAweome CDN Link for Icons -->
+    <script src="https://kit.fontawesome.com/c71231073e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/findWord.css">
+  </head>
+  <body>
+    <nav id='menu'>
+  <input type='checkbox' id='responsive-menu' onclick='updatemenu()'><label></label>
+  <ul>
+    <li><a href='/'>Home</a></li>
+    
+    <li><a href='/login'>Login</a></li>
+  </ul>
+</nav>
+    <div class="sidebar">
+        <div class="table-container">
+            <table>
+              <thead> 
+                  <tr> 최근에 찾던 단어</tr>
+                  <hr >
+              </thead>
+              <tbody>
+                {{#each history}}
+                <tr>
+                  <td>{{this.word}}</td>
+                  
+                  <td style="min-width: 54px;">{{this.date}} </td>
+                  <td style="min-width: 25px;"><i class="fa-regular fa-star"></i></td>
+                {{/each}}  
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+          
+    </div>
+    <div class="wrapper">
+      <header><img src="https://cdn-icons-png.flaticon.com/512/4482/4482887.png" alt=""> 한국어  <i class="fa-solid fa-right-left"></i>  베트남어<img src="https://cdn-icons-png.flaticon.com/512/5399/5399585.png" alt=""></header>
+      <form action="#" id="form_submit">
+        <div class="amount">
+          <p>검색어를 입력하세요</p>
+          <input type="hidden" value="1" id="type_trans">
+          <input type="text" name="text1" placeholder="텍스트 입력" maxlength="14">
+          <span id="error-message"></span>
+        </div>
+        <div class="drop-list">
+          <div class="from">
+            <p id="text-left">출발언어</p>
+            <div class="select-box">
+              <select>
+                <option>
+                    언어 감지
+                </option>
+                <option>
+                    한국어
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="icon" id="type_icon" onclick="change_langue()"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="to">
+            <p id="text-right">도착언어</p>
+            <div class="select-box">
+              <select name="language" id="list-language">
+                {{#each languages}}
+                    <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+          </div>
+          
+        </div>
+        <p class="ketqua">결과</p>
+        <ul class="exchange-rate">  
+            
+        </ul>
+        <button>검색</button>
+        
+      </form>
+      <em>
+        시운 -컴퓨터 공학과</em><br>
+        <marquee direction="right", scrollamoun="1" > 안녕하세요 : xin chào&ensp; 감사합니다 : cảm ơn &ensp;교수님 : giáo sư &ensp;베트남 : VIỆT NAM &ensp;컴퓨터 : máy tính &ensp;재미있다 : thú vị &ensp;코리아 : korea</marquee>
+    </div>
+    
+
+    {{!-- <div class="button-change-page">
+        <a class="button-link" href="/login">관리자</a> --}}
+        
+        
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+  // Lấy tất cả các phần tử có lớp "fa-regular fa-star"
+const starIcons = document.querySelectorAll('.fa-regular.fa-star');
+
+// Lặp qua tất cả các phần tử và thêm sự kiện click
+starIcons.forEach(starIcon => {
+  starIcon.addEventListener('click', () => {
+    // Xóa lớp "active" khỏi tất cả các phần tử khác
+    starIcons.forEach(icon => icon.classList.remove('active'));
+    
+    // Thêm lớp "active" cho phần tử đang được click
+    starIcon.classList.add('active');
+  });
+});
+
+    let language = document.getElementById('list-language').value;
+    let root_langue = document.getElementsByClassName("exchange-rate")[0];
+    function change_langue(){
+        let type = `<i class="fa-sharp fa-solid fa-arrow-left"></i>`;
+        let type_trans = document.getElementById("type_trans");
+        if (type_trans.value == 1){
+            type_trans.value = 2;
+            document.getElementById("text-left").innerText = "출발언어";
+            document.getElementById("text-right").innerText = "도착언어";
+        }else{
+            type_trans.value = 1;
+            type = `<i class="fa-solid fa-arrow-right"></i>`;
+            document.getElementById("text-left").innerText = "출발언어";
+            document.getElementById("text-right").innerText = "도착언어";
+        }
+        document.getElementById("type_icon").innerHTML = type;
+    }
+    document.getElementById('list-language').addEventListener('change', function() {
+        language = this.value;
+    });
+    document.getElementById("form_submit").addEventListener("submit", function(e){
+        e.preventDefault();
+        let text = document.getElementsByName("text1")[0].value;
+        let type  = document.getElementById("type_trans").value;
+        console.log(text, type, language);
+        $.ajax({
+            type: "GET",
+            url: "/find",
+            dataType: "json",
+            data: {
+                type: type,
+                word: text,
+                language: language,
+            },
+            success: function(response){
+                if (response.length == 0){
+                    root_langue.innerHTML = `<li>이 단어를 찾을 수 없습니다</li> <br><a href="/login">단어/어휘 추가</a>`;
+                    swal({
+                        title: "단어를 찾을 수 없습니다.",
+                        text: `찾은 단어: ${text}가 없습니다, 언어 추가하세요`,
+                        icon: "error",
+                        button: "확인",
+                    });
+                    
+                }else{
+                    root_langue.innerHTML = ``;
+                    for (let i = 0; i < response.length; i++){
+                        root_langue.innerHTML += `
+                            <li class="trans-list">
+                                <b>${response[i].foreign_languages}</b>
+                                <p>- 자세히 설명: ${ response[i].description }</p>
+                                <p><i class="fa-regular fa-star"></i> 리퓨: ${ response[i].vote_up } <i class="fa-regular fa-thumbs-up"></i> | ${ response[i].vote_down } <i class="fa-regular fa-thumbs-down"></i> | <a href="/vote/${ response[i]._id }">리퓨 쓰기 <i class="fa-solid fa-pen"></i></a></p>
+                            </li>
+                        `
+                    }
+                }
+            }
+        })
+    })
+          function updatemenu() {
+        if (document.getElementById('responsive-menu').checked == true) {
+          document.getElementById('menu').style.borderBottomRightRadius = '0';
+          document.getElementById('menu').style.borderBottomLeftRadius = '0';
+        }else{
+          document.getElementById('menu').style.borderRadius = '10px';
+        }
+      }
+      const input = document.querySelector('input');
+const errorMessage = document.getElementById('error-message');
+
+input.addEventListener('input', function() {
+  if (this.value.length > 14) {
+    this.value = this.value.slice(0, 20); // Giới hạn độ dài tối đa
+    errorMessage.style.display = 'inline'; // Hiển thị thông báo lỗi
+  } else {
+    errorMessage.style.display = 'none'; // Ẩn thông báo lỗi
+  }
+});
+
+
+</script>
+
+  </body>
+</html>
